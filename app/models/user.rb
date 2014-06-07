@@ -5,8 +5,6 @@ class User < ActiveRecord::Base
 
   ENCRYPT = Digest::SHA256
 
-  has_many :sessions, :dependent => :destroy
-
   validates_uniqueness_of :username, :case_sensitive => false, :message => "is already in use by another user"
 
   validates_format_of :username, :with => /\A([a-z0-9_]{2,16})\z/i,
@@ -49,7 +47,7 @@ class User < ActiveRecord::Base
   def password_is_not_being_updated?
     self.id and self.password.blank?
   end
-  
+
   def set_auth_token
     return if auth_token.present?
 

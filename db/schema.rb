@@ -13,14 +13,6 @@
 
 ActiveRecord::Schema.define(version: 20140606193419) do
 
-  create_table "sessions", force: true do |t|
-    t.integer  "user_id"
-    t.string   "ip_address"
-    t.string   "path"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "users", force: true do |t|
     t.string   "username"
     t.string   "salt"

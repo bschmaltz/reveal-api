@@ -1,4 +1,5 @@
-object @result
+object @user
+attributes :username
 
 if @result==false
   node(:success) { false }

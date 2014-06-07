@@ -1,2 +1,2 @@
 object @user
-attributes :id, :username,  :updated_at
+attributes :id, :username, :updated_at

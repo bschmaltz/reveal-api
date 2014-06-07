@@ -1,2 +1,0 @@
-object @session
-attributes :id

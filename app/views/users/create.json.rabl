@@ -1,9 +1,8 @@
 object @user
-attributes :id, :username
+attributes :id, :username, :auth_token
 
-if !@user.sessions.empty?
+if @result==true
   node(:success) { true }
-  node(:session_id) { @session.id }
 else
   node(:success) { false }
 end
