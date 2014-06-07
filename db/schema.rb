@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 20140606193419) do
     t.string   "username"
     t.string   "salt"
     t.string   "encrypted_password"
+    t.string   "auth_token"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

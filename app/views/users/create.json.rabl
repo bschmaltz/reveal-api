@@ -1,4 +1,5 @@
 object @user
+attributes :id, :username
 
 if !@user.sessions.empty?
   node(:success) { true }

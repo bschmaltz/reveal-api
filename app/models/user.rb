@@ -17,7 +17,7 @@ class User < ActiveRecord::Base
     :unless => :password_is_not_being_updated?
 
   validates_confirmation_of :password
-
+  before_create :set_auth_token
   before_save :scrub_username
   after_save :flush_passwords
 
@@ -48,5 +48,13 @@ class User < ActiveRecord::Base
 
   def password_is_not_being_updated?
     self.id and self.password.blank?
+  end
+  
+  def set_auth_token
+    return if auth_token.present?
+
+    begin
+      self.auth_token = SecureRandom.hex
+    end while self.class.exists?(auth_token: self.auth_token)
   end
 end
