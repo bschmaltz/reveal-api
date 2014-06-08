@@ -4,7 +4,8 @@ class PostsController < ApplicationController
   def create
     @user = authenticate_token
     @post = Post.new(post_params)
-    if !@user.nil? and @user.username==post_params[:username] and @post.save
+    @post.username = User.find(post_params[:user_id]).username
+    if !@user.nil? and @user.id==post_params[:user_id] and @post.save
       @result = true
     else
       @result = false
@@ -22,7 +23,7 @@ class PostsController < ApplicationController
   def update
     @user = authenticate_token
     @post = Post.find(params[:id])
-    if !@user.nil? and !@post.nil? and @user.username==post_params[:username] and @user.username==@post.username and @post.update_attributes(post_params)
+    if !@user.nil? and !@post.nil? and @user.id==post_params[:user_id] and @user.id==@post.user_id and @post.update_attributes(post_params)
       @result = true
     else
       @result = false
@@ -32,8 +33,8 @@ class PostsController < ApplicationController
   def destroy
     @user = authenticate_token
     @post = Post.find(params[:id])
-    if !@user.nil? and !@post.nil? and @user.username==@post.username
-      @result = Post.destroy(params[:id])
+    if !@user.nil? and !@post.nil? and @user.id==@post.user_id and @post.destroy
+      @result = true
     else
       @result = false
     end
@@ -42,7 +43,7 @@ class PostsController < ApplicationController
   def reveal
     @user = authenticate_token
     @post = Post.find(params[:id])
-    if !@user.nil? and !@post.nil? and @user.username==@post.username and @post.update_attribute(:revealed, true)
+    if !@user.nil? and !@post.nil? and @user.id==@post.user_id and @post.update_attribute(:revealed, true)
       @result = true
     else
       @result = false
@@ -52,7 +53,7 @@ class PostsController < ApplicationController
   def hide
     @user = authenticate_token
     @post = Post.find(params[:id])
-    if !@user.nil? and !@post.nil? and @user.username==@post.username and @post.update_attribute(:revealed, false)
+    if !@user.nil? and !@post.nil? and @user.id==@post.user_id and @post.update_attribute(:revealed, false)
       @result = true
     else
       @result = false
@@ -62,6 +63,6 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:username, :content, :revealed)
+    params.require(:post).permit(:user_id, :content, :revealed)
   end
 end

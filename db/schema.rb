@@ -11,11 +11,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140608011543) do
+ActiveRecord::Schema.define(version: 20140608170438) do
 
   create_table "posts", force: true do |t|
-    t.string   "content"
+    t.integer  "user_id"
     t.string   "username"
+    t.string   "content"
     t.boolean  "revealed"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -26,6 +27,14 @@ ActiveRecord::Schema.define(version: 20140608011543) do
     t.string   "salt"
     t.string   "encrypted_password"
     t.string   "auth_token"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "votes", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "post_id"
+    t.boolean  "up"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

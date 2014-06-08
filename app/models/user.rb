@@ -5,6 +5,9 @@ class User < ActiveRecord::Base
 
   ENCRYPT = Digest::SHA256
 
+  has_many :posts, :dependent => :destroy
+  has_many :votes
+
   validates_uniqueness_of :username, :case_sensitive => false, :message => "is already in use by another user"
 
   validates_format_of :username, :with => /\A([a-z0-9_]{2,16})\z/i,

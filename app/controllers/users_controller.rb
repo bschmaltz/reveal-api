@@ -29,8 +29,9 @@ class UsersController < ApplicationController
 
   def destroy
     @user = authenticate_token
-    if !@user.nil? and @user.id==params[:id].to_i
-      @result = User.destroy(params[:id])
+    @user_del = User.find(params[:id])
+    if !@user.nil? and @user.id==@user_del.id and @user_del.destroy
+      @result = true
     else
       @result = false
     end

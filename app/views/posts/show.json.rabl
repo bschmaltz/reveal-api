@@ -10,3 +10,13 @@ node :username do |post|
     "Anonymous"
   end
 end
+
+node :user_id do |post|
+  if post.nil?
+    0
+  elsif post.revealed
+    post.user_id
+  else
+    0
+  end
+end
