@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   post '/posts', to: 'posts#create', defaults: {format: :json}
   get '/posts/index', to: 'posts#index', defaults: { format: :json }
-  get '/posts/index/:page', to: 'posts#index', defaults: { format: :json }
+  get '/posts/index/:last_post_id', to: 'posts#index', defaults: { format: :json }
   get '/posts/show/:id', to: 'posts#show', defaults: { format: :json }
   put '/posts/:id', to: 'posts#update', defaults: {format: :json}
   delete '/posts/:id', to: 'posts#destroy', defaults: {format: :json}

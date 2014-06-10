@@ -1,7 +1,15 @@
 object @post
 attributes :id, :content, :revealed, :vote_stat, :created_at, :updated_at
 
-node(:user_vote) { @user_vote }
+node(:current_user_vote) { @current_user_vote }
+
+node :current_user_is_poster do |post|
+  if post.nil? or @user.nil?
+    false
+  else
+    post.user_id==@user.id
+  end
+end
 
 node :username do |post|
   if post.nil?

@@ -1,5 +1,13 @@
 collection @posts_with_votes
-attributes :id, :content, :revealed, :vote_stat, :user_vote, :created_at, :updated_at
+attributes :id, :content, :revealed, :vote_stat, :current_user_vote, :created_at, :updated_at
+
+node :current_user_is_poster do |post|
+  if post.nil? or @user.nil?
+    false
+  else
+    post.user_id==@user.id
+  end
+end
 
 node :username do |post|
   if post.nil?

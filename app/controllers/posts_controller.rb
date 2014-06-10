@@ -13,49 +13,51 @@ class PostsController < ApplicationController
   end
 
   def index
-    if params[:page].nil?
-      params[:page]=0;
+    @posts = nil
+    if params[:last_post_id].nil?
+      @posts = Post.order(created_at: :desc).limit(10)
     else
-      params[:page]=params[:page].to_i;
+      last_post = Post.find(params[:last_post_id].to_i)
+      @posts = Post.where("created_at <= :last_post_date AND id != :last_post_id",{last_post_date: last_post.created_at, last_post_id: last_post.id}).order(created_at: :desc).limit(10)
     end
 
-    @posts = Post.order(:created_at).limit(10).offset(10*params[:page])
     @user = authenticate_token
     @posts_with_votes = []
 
+    #\33t h6x
     @posts.each do |post|
       if @user.nil?
-         @posts_with_votes.push(OpenStruct.new(post.attributes.merge({user_vote: 'no vote', vote_stat: post.vote_stat})))
+         @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
       else
         vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
-        if @user.id == post.id
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({user_vote: 'up', vote_stat: post.vote_stat})))
+        if @user.id == post.user_id
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
         elsif vote.nil?
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({user_vote: 'no vote', vote_stat: post.vote_stat})))
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
         elsif vote.up
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({user_vote: 'up', vote_stat: post.vote_stat})))
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
         else
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({user_vote: 'down', vote_stat: post.vote_stat})))
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'down', vote_stat: post.vote_stat})))
         end
       end
     end
   end
 
   def show
-    user = authenticate_token
+    @user = authenticate_token
     @post = Post.find(params[:id])
-    if user.nil?
-      @user_vote = 'no vote'
+    if @user.nil?
+      @current_user_vote = 'no vote'
     else
-      vote = Vote.find_by_user_id_and_post_id(user.id, params[:id])
-      if user.id == @post.id
-        @user_vote = 'up'
+      vote = Vote.find_by_user_id_and_post_id(@user.id, params[:id])
+      if @user.id == @post.user_id
+        @current_user_vote = 'up'
       elsif vote.nil?
-        @user_vote = 'no vote'
+        @current_user_vote = 'no vote'
       elsif vote.up
-        @user_vote = 'up'
+        @current_user_vote = 'up'
       else
-        @user_vote = 'down'
+        @current_user_vote = 'down'
       end
     end
   end
