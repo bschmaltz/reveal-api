@@ -1,5 +1,5 @@
 object @post
-attributes :id, :content, :created_at, :updated_at
+attributes :id, :content, :vote_stat, :created_at, :updated_at
 
 if @result==true
   node(:success) { true }

@@ -4,7 +4,8 @@ class VotesController < ApplicationController
   def create
     @user = authenticate_token
     @vote = Vote.new(vote_params)
-    if !@user.nil? and @user.id==vote_params[:user_id] and @vote.save
+    @post = Post.find(vote_params[:post_id])
+    if !@user.nil? and !@post.nil? and @post.user_id!=vote_params[:user_id] and @user.id==vote_params[:user_id] and @vote.save
       @result = true
     else
       @result = false
