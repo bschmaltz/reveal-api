@@ -10,7 +10,7 @@ class User < ActiveRecord::Base
   has_many :user_followers, class_name: 'Follower', foreign_key: :user_id, dependent: :destroy
   has_many :user_followed, class_name: 'Follower', foreign_key: :followed_user_id, dependent: :destroy
 
-  def followers
+  def follows
     user_followers+user_followed
   end
 
