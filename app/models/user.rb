@@ -5,8 +5,14 @@ class User < ActiveRecord::Base
 
   ENCRYPT = Digest::SHA256
 
-  has_many :posts, :dependent => :destroy
+  has_many :posts, dependent: :destroy
   has_many :votes
+  has_many :user_followers, class_name: 'Follower', foreign_key: :user_id, dependent: :destroy
+  has_many :user_followed, class_name: 'Follower', foreign_key: :followed_user_id, dependent: :destroy
+
+  def followers
+    user_followers+user_followed
+  end
 
   validates_uniqueness_of :username, :case_sensitive => false, :message => "is already in use by another user"
 

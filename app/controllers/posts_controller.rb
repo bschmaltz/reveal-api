@@ -43,6 +43,14 @@ class PostsController < ApplicationController
     end
   end
 
+  #TODO: INDEX FOR USER
+  #FEEDS SECOND PRIORITY
+  #SHARING
+
+  #AUX
+  #COMMENTING
+  #MESSAGING
+
   def show
     @user = authenticate_token
     @post = Post.find(params[:id])
