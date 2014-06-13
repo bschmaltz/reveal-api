@@ -17,6 +17,9 @@ Rails.application.routes.draw do
   put '/votes/update', to: 'votes#update', defaults: { format: :json }
   delete '/votes/destroy/:user_id/:post_id', to: 'votes#destroy', defaults: { format: :json }
 
+  post '/shares', to: 'shares#create', defaults: { format: :json }
+  delete '/shares/:user_id/:post_id', to: 'shares#destroy', defaults: { format: :json }
+
   post '/followers', to: 'followers#create', defaults: { format: :json }
   get '/followers/:user_id', to: 'followers#get_followers_for_user', defaults: { format: :json }
   get '/followed/:user_id', to: 'followers#get_followed_for_user', defaults: { format: :json }
