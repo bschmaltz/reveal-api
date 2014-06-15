@@ -4,12 +4,26 @@ class PostsController < ApplicationController
   def create
     @user = authenticate_token
     @post = Post.new(post_params)
+    @vote = Vote.new({user_id: @user.id, post_id: @post.id, up: true})
     @post.username = User.find(post_params[:user_id]).username
-    if !@user.nil? and @user.id==post_params[:user_id] and @post.save
+    if !@user.nil? and @user.id==post_params[:user_id] and @post.save and @vote.save
       @result = true
     else
       @result = false
     end
+  end
+
+  def index_for_user
+    @posts = nil
+    @user = authenticate_token
+    if @user.nil?
+      @posts = Post.where('user_id = ?', params[:user_id]).order(created_at: :desc)
+    else      
+      @posts = Post.where('user_id = ?', params[:user_id]).order(created_at: :desc)
+    end
+
+    add_vote_data(@posts, @user)
+    render 'index'
   end
 
   def index
@@ -22,34 +36,8 @@ class PostsController < ApplicationController
     end
 
     @user = authenticate_token
-    @posts_with_votes = []
-
-    #\33t h6x
-    @posts.each do |post|
-      if @user.nil?
-         @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
-      else
-        vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
-        if @user.id == post.user_id
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
-        elsif vote.nil?
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
-        elsif vote.up
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
-        else
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'down', vote_stat: post.vote_stat})))
-        end
-      end
-    end
+    add_vote_data(@posts, @user)
   end
-
-  #TODO: INDEX FOR USER
-  #FEEDS SECOND PRIORITY
-  #SHARING
-
-  #AUX
-  #COMMENTING
-  #MESSAGING
 
   def show
     @user = authenticate_token
@@ -114,5 +102,26 @@ class PostsController < ApplicationController
 
   def post_params
     params.require(:post).permit(:user_id, :content, :revealed)
+  end
+
+  def add_vote_data(posts, user)
+    @posts_with_votes = []
+    #\33t h6x
+    posts.each do |post|
+      if user.nil?
+         @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
+      else
+        vote = Vote.find_by_user_id_and_post_id(user.id, post.id)
+        if user.id == post.user_id
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
+        elsif vote.nil?
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
+        elsif vote.up
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
+        else
+          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'down', vote_stat: post.vote_stat})))
+        end
+      end
+    end
   end
 end
