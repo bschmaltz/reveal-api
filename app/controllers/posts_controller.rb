@@ -16,9 +16,9 @@ class PostsController < ApplicationController
   def index_for_user
     @posts = nil
     @user = authenticate_token
-    if @user.nil?
-      @posts = Post.where('user_id = ?', params[:user_id]).order(created_at: :desc)
-    else      
+    if @user.nil? or @user.id != params[:user_id].to_i
+      @posts = Post.where('user_id = ? AND revealed = ?', params[:user_id], true).order(created_at: :desc)
+    else
       @posts = Post.where('user_id = ?', params[:user_id]).order(created_at: :desc)
     end
 
@@ -104,22 +104,25 @@ class PostsController < ApplicationController
     params.require(:post).permit(:user_id, :content, :revealed)
   end
 
+  #this needs to be refactored to use joins and not just packing attributes
   def add_vote_data(posts, user)
     @posts_with_votes = []
     #\33t h6x
-    posts.each do |post|
-      if user.nil?
-         @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
-      else
-        vote = Vote.find_by_user_id_and_post_id(user.id, post.id)
-        if user.id == post.user_id
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
-        elsif vote.nil?
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
-        elsif vote.up
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
+    if !posts.nil?
+      posts.each do |post|
+        if user.nil?
+           @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
         else
-          @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'down', vote_stat: post.vote_stat})))
+          vote = Vote.find_by_user_id_and_post_id(user.id, post.id)
+          if user.id == post.user_id
+            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
+          elsif vote.nil?
+            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
+          elsif vote.up
+            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
+          else
+            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'down', vote_stat: post.vote_stat})))
+          end
         end
       end
     end
