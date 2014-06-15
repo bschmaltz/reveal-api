@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 20140613043810) do
   create_table "posts", force: true do |t|
     t.integer  "user_id"
     t.integer  "vote_stat"
+    t.integer  "share_stat"
     t.string   "username"
     t.string   "content"
     t.boolean  "revealed"

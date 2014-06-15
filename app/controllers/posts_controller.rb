@@ -4,9 +4,10 @@ class PostsController < ApplicationController
   def create
     @user = authenticate_token
     @post = Post.new(post_params)
-    @vote = Vote.new({user_id: @user.id, post_id: @post.id, up: true})
     @post.username = User.find(post_params[:user_id]).username
-    if !@user.nil? and @user.id==post_params[:user_id] and @post.save and @vote.save
+    if !@user.nil? and @user.id==post_params[:user_id] and @post.save
+      @vote = Vote.new({user_id: @user.id, post_id: @post.id, up: true})
+      @vote.save
       @result = true
     else
       @result = false
@@ -41,21 +42,9 @@ class PostsController < ApplicationController
 
   def show
     @user = authenticate_token
-    @post = Post.find(params[:id])
-    if @user.nil?
-      @current_user_vote = 'no vote'
-    else
-      vote = Vote.find_by_user_id_and_post_id(@user.id, params[:id])
-      if @user.id == @post.user_id
-        @current_user_vote = 'up'
-      elsif vote.nil?
-        @current_user_vote = 'no vote'
-      elsif vote.up
-        @current_user_vote = 'up'
-      else
-        @current_user_vote = 'down'
-      end
-    end
+    @posts = Post.where('id = ?', params[:id])
+    add_vote_data(@posts, @user)
+    @post = @posts_with_votes.nil? ? nil : @posts_with_votes[0]
   end
 
   def update
@@ -104,27 +93,35 @@ class PostsController < ApplicationController
     params.require(:post).permit(:user_id, :content, :revealed)
   end
 
-  #this needs to be refactored to use joins and not just packing attributes
+  #this needs to be refactored
   def add_vote_data(posts, user)
     @posts_with_votes = []
     #\33t h6x
     if !posts.nil?
       posts.each do |post|
-        if user.nil?
-           @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
-        else
+        vote = nil
+        share = nil
+        if !user.nil?
           vote = Vote.find_by_user_id_and_post_id(user.id, post.id)
-          if user.id == post.user_id
-            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
-          elsif vote.nil?
-            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'no vote', vote_stat: post.vote_stat})))
-          elsif vote.up
-            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'up', vote_stat: post.vote_stat})))
-          else
-            @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: 'down', vote_stat: post.vote_stat})))
-          end
+          share = Share.find_by_user_id_and_post_id(user.id, post.id)
         end
+        @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat})))
       end
     end
   end
+
+  def user_vote(vote)
+    if vote.nil?
+      'no vote'
+    elsif vote.up
+      'up'
+    else
+      'down'
+    end
+  end
+
+  def user_shared(share)
+    !share.nil?
+  end
+
 end

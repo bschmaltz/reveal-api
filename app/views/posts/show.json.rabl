@@ -1,7 +1,5 @@
 object @post
-attributes :id, :content, :revealed, :vote_stat, :created_at, :updated_at
-
-node(:current_user_vote) { @current_user_vote }
+attributes :id, :content, :revealed, :vote_stat, :current_user_vote, :share_stat, :current_user_shared, :created_at, :updated_at
 
 node :current_user_is_poster do |post|
   if post.nil? or @user.nil?
