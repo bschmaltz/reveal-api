@@ -14,6 +14,30 @@ class PostsController < ApplicationController
     end
   end
 
+  def index_followed_posts
+    @items = []
+    followed_posts=nil
+    followed_shares=nil
+    @user = authenticate_token
+    if !@user.nil?
+      if params[:last_post_id].nil? and params[:last_share_id].nil?
+        followed_posts = User.joins(:user_followed).joins(:posts).where('posts.revealed >= ?', true).order(created_at: :desc).limit(10).select('posts.id as id, posts.created_at as created_at')
+        followed_shares = User.joins(:user_followed).joins(:shares).order(created_at: :desc).limit(10).select('shares.id as id, shares.post_id as post_id, shares.created_at as created_at, users.id as user_id, users.username as username')
+      else
+        if params[:last_post_id]
+          last_post = Post.find(params[:last_post_id].to_i)
+          followed_posts = User.joins(:user_followed).joins(:posts).where("posts.created_at >= ? AND posts.id != ? AND posts.revealed = ?", last_post.created_at, last_post.id, true).order(created_at: :desc).limit(10).select('posts.id as id, posts.created_at as created_at')
+          followed_shares = User.joins(:user_followed).joins(:shares).where("shares.created_at >= ?", last_post.created_at).order(created_at: :desc).limit(10).select('shares.id as id, shares.post_id as post_id, shares.created_at as created_at, users.id as user_id, users.username as username')
+        else
+          last_share = Share.find(params[:last_share_id].to_i)
+          followed_posts = User.joins(:user_followed).joins(:posts).where("posts.created_at >= ? AND posts.revealed = ?", last_share.created_at, true).order(created_at: :desc).limit(10).select('posts.id as id, posts.created_at as created_at')
+          followed_shares = User.joins(:user_followed).joins(:shares).where("shares.created_at >= ? AND shares.id != ?", last_share.created_at, last_share.id).order(created_at: :desc).limit(10).select('shares.id as id, shares.post_id as post_id, shares.created_at as created_at, users.id as user_id, users.username as username')
+        end
+      end
+    end
+    setup_items(followed_posts, followed_shares)
+  end
+
   def index_for_user
     @posts = nil
     @user = authenticate_token
@@ -23,7 +47,7 @@ class PostsController < ApplicationController
       @posts = Post.where('user_id = ?', params[:user_id]).order(created_at: :desc)
     end
 
-    add_vote_data(@posts, @user)
+    setup_posts(@posts, @user)
     render 'index'
   end
 
@@ -33,17 +57,17 @@ class PostsController < ApplicationController
       @posts = Post.order(created_at: :desc).limit(10)
     else
       last_post = Post.find(params[:last_post_id].to_i)
-      @posts = Post.where("created_at <= :last_post_date AND id != :last_post_id",{last_post_date: last_post.created_at, last_post_id: last_post.id}).order(created_at: :desc).limit(10)
+      @posts = Post.where("created_at >= :last_post_date AND id != :last_post_id",{last_post_date: last_post.created_at, last_post_id: last_post.id}).order(created_at: :desc).limit(10)
     end
 
     @user = authenticate_token
-    add_vote_data(@posts, @user)
+    setup_posts(@posts, @user)
   end
 
   def show
     @user = authenticate_token
     @posts = Post.where('id = ?', params[:id])
-    add_vote_data(@posts, @user)
+    setup_posts(@posts, @user)
     @post = @posts_with_votes.nil? ? nil : @posts_with_votes[0]
   end
 
@@ -94,7 +118,7 @@ class PostsController < ApplicationController
   end
 
   #this needs to be refactored
-  def add_vote_data(posts, user)
+  def setup_posts(posts, user)
     @posts_with_votes = []
     #\33t h6x
     if !posts.nil?
@@ -106,6 +130,45 @@ class PostsController < ApplicationController
           share = Share.find_by_user_id_and_post_id(user.id, post.id)
         end
         @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat})))
+      end
+    end
+  end
+
+  #need to refactor badly, but whatevs
+  def setup_items(followed_posts, followed_shares)
+    p = 0
+    s = 0
+    10.times do
+      if !followed_posts.nil? and !followed_shares.nil? and (p<followed_posts.length or s<followed_shares.length)
+        item = nil
+        if followed_shares.nil? or s>=followed_shares.length
+          post = Post.find(followed_posts[p].id)
+          vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
+          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat}))
+          p = p+1
+        elsif followed_posts.nil? or p>=followed_posts.length
+          post = Post.find(followed_shares[s].post_id)
+          vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
+          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat}))
+          s = s+1
+        elsif followed_posts[p].created_at<followed_shares[s].created_at
+          post = Post.find(followed_posts[p].id)
+          vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
+          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat}))
+          p = p+1
+        else
+          post = Post.find(followed_shares[s].post_id)
+          vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
+          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat}))
+          s = s+1
+        end
+        @items.push(item)
+      else
+        break
       end
     end
   end
