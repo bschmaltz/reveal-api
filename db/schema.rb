@@ -27,6 +27,8 @@ ActiveRecord::Schema.define(version: 20140613043810) do
     t.string   "username"
     t.string   "content"
     t.boolean  "revealed"
+    t.float    "latitude"
+    t.float    "longitude"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

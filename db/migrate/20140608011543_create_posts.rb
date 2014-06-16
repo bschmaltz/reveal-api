@@ -4,6 +4,7 @@ class CreatePosts < ActiveRecord::Migration
       t.integer :user_id, :vote_stat, :share_stat
       t.string :username, :content
       t.boolean :revealed
+      t.float :latitude, :longitude
 
       t.timestamps
     end
