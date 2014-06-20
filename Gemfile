@@ -41,4 +41,7 @@ gem 'rabl'
 
 gem 'rails_12factor', group: :production
 
+gem 'rack-cors', :require => 'rack/cors'
+
+
 ruby "2.1.2"

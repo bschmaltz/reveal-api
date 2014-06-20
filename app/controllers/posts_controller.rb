@@ -5,8 +5,6 @@ class PostsController < ApplicationController
     @user = authenticate_token
     @post = Post.new(post_params)
     @post.username = User.find(post_params[:user_id]).username
-    p "poast_params[:user_id]=#{post_params[:user_id]}"
-    p "@user.id=#{@user.id}"
     if !@user.nil? and @user.id==post_params[:user_id] and @post.save
       @vote = Vote.new({user_id: @user.id, post_id: @post.id, up: true})
       @vote.save
