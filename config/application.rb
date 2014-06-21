@@ -20,10 +20,10 @@ module RevealApi
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    config.middleware.insert_after Rails::Rack::Logger, Rack::Cors, :logger => Rails.logger do
+    config.middleware.use Rack::Cors do
       allow do
         origins '*'
-        resource '*', :headers => :any, :methods => [:get, :post, :put, :delete]
+        resource '*', :headers => :any, :methods => :any
       end
     end
   end
