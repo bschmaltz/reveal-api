@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  match "*all" => "application#cors_preflight_check", :constraints => { :method => "OPTIONS" }, via: :all
   root to: 'user#index'
 
   post '/users/login', to: 'users#login', defaults: { format: :json }
