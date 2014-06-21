@@ -1,25 +1,12 @@
 class ApplicationController < ActionController::Base
-  before_filter :cors_preflight_check
-  after_filter :cors_set_access_control_headers
-
-  def cors_set_access_control_headers
-    p "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCccc"
-    headers['Access-Control-Allow-Origin'] = '*'
-    headers['Access-Control-Allow-Methods'] = 'POST, PUT, DELETE, GET, OPTIONS'
-    headers['Access-Control-Request-Method'] = '*'
-    headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  end
+  include ActionController::ImplicitRender
+  include ActionController::MimeResponds
 
   def cors_preflight_check
-    p "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
-    if request.method == :options
-      headers['Access-Control-Allow-Origin'] = '*'
-      headers['Access-Control-Allow-Methods'] = 'POST, PUT, DELETE, GET, OPTIONS'
-      headers['Access-Control-Request-Method'] = '*'
-      headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-      render :text => '', :content_type => 'text/plain'
-    end
-end
+    headers['Access-Control-Max-Age'] = '1728000'
+
+    render json: {} # Render as you need
+  end
 
   protected
   def authenticate
