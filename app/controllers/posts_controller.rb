@@ -57,7 +57,7 @@ class PostsController < ApplicationController
       @posts = Post.order(created_at: :desc).limit(10)
     else
       last_post = Post.find(params[:last_post_id].to_i)
-      @posts = Post.where("created_at >= :last_post_date AND id != :last_post_id",{last_post_date: last_post.created_at, last_post_id: last_post.id}).order(created_at: :desc).limit(10)
+      @posts = Post.where("created_at <= :last_post_date AND id != :last_post_id",{last_post_date: last_post.created_at, last_post_id: last_post.id}).order(created_at: :desc).limit(10)
     end
 
     @user = authenticate_token
