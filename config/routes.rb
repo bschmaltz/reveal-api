@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   root to: 'user#index'
 
   post '/users/login', to: 'users#login', defaults: { format: :json }
+  post '/users/setting/update_avatar', to: 'users#update_avatar', defaults: { format: :json }
   resources :users, defaults: { format: :json }
 
   post '/posts', to: 'posts#create', defaults: {format: :json}

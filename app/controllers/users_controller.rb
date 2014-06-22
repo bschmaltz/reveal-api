@@ -27,6 +27,27 @@ class UsersController < ApplicationController
     end
   end
 
+  def update_avatar
+    @user = authenticate_token
+    new_avatar = nil
+    if @user.nil? or (params[:avatar].nil? and params[:remote_url].empty?)
+      @result = false
+    else
+      if !params[:avatar].nil? 
+        new_avatar = params[:avatar]
+      else
+        new_avatar = URI.parse(params[:remote_url])
+      end
+      if @user.update_attribute(:avatar, new_avatar)
+        @result = true
+      else
+        @result = false
+      end
+    end
+    
+    render 'update'
+  end
+
   def destroy
     @user = authenticate_token
     @user_del = User.find(params[:id])
@@ -49,6 +70,6 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:username, :password)
+    params.require(:user).permit(:username, :password, :avatar)
   end
 end

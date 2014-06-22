@@ -1,2 +1,4 @@
 object @user
-attributes :id, :username, :updated_at
+attributes :id, :username, :created_at
+
+node(:avatar_medium) {@user.avatar.url(:medium) }

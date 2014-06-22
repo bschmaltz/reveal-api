@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140613043810) do
+ActiveRecord::Schema.define(version: 20140622045510) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,7 +27,6 @@ ActiveRecord::Schema.define(version: 20140613043810) do
     t.integer  "user_id"
     t.integer  "vote_stat"
     t.integer  "share_stat"
-    t.string   "username"
     t.string   "content"
     t.boolean  "revealed"
     t.float    "latitude"
@@ -50,6 +49,10 @@ ActiveRecord::Schema.define(version: 20140613043810) do
     t.string   "auth_token"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "avatar_file_name"
+    t.string   "avatar_content_type"
+    t.integer  "avatar_file_size"
+    t.datetime "avatar_updated_at"
   end
 
   create_table "votes", force: true do |t|

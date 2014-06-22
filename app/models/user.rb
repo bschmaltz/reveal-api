@@ -1,7 +1,7 @@
 require 'digest/sha2'
 
 class User < ActiveRecord::Base
-  attr_reader :password
+  attr_reader :password, :avatar_remote_url
 
   ENCRYPT = Digest::SHA256
 
@@ -10,6 +10,14 @@ class User < ActiveRecord::Base
   has_many :shares
   has_many :user_followers, class_name: 'Follower', foreign_key: :user_id, dependent: :destroy
   has_many :user_followed, class_name: 'Follower', foreign_key: :followed_user_id, dependent: :destroy
+  
+  has_attached_file :avatar, :styles => { :medium => "300x300>", :thumb => "100x100>" }, :default_url => "/assets/default_avatars/:style/default.jpg"
+  validates_attachment_content_type :avatar, :content_type => /\Aimage\/.*\Z/
+  
+  def avatar_from_url(url)
+    self.avatar = URI.parse(url)
+    @avatar_remote_url = url
+  end
 
   def follows
     user_followers+user_followed

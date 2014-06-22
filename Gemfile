@@ -42,6 +42,7 @@ gem 'rabl'
 gem 'rails_12factor', group: :production
 
 gem 'rack-cors', :require => 'rack/cors'
-
+gem 'paperclip'
+gem 'aws-sdk'
 
 ruby "2.1.2"

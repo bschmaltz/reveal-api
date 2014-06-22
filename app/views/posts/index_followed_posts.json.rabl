@@ -10,12 +10,22 @@ node :current_user_is_poster do |post|
 end
 
 node :username do |post|
-  if post.nil?
+  if post.user.nil?
     ""
   elsif post.revealed
-    post.username
+    post.user.username
   else
     "Anonymous"
+  end
+end
+
+node :avatar_thumb do |post|
+  if post.user.nil?
+    ""
+  elsif post.revealed
+    post.user.avatar.url(:thumb)
+  else
+    "/assets/default_avatars/thumb/anonymous.jpg"
   end
 end
 
