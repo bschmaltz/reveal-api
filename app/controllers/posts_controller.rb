@@ -65,7 +65,7 @@ class PostsController < ApplicationController
 
   def show
     @user = authenticate_token
-    @posts = Post.find(params[:id])
+    @posts = Post.where("id = ?", params[:id])
     setup_posts(@posts, @user)
     @post = @posts_with_votes.nil? ? nil : @posts_with_votes[0]
   end
