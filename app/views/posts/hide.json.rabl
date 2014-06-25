@@ -1,4 +1,4 @@
-object @result
+object @post
 
 if @result==false
   node(:success) { false }
