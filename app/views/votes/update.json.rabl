@@ -1,5 +1,5 @@
 object @vote
-attributes :post_id, :up
+attributes :post_id, :action
 
 if @result==true
   node(:success) { true }

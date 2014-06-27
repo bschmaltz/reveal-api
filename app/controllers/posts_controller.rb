@@ -5,8 +5,6 @@ class PostsController < ApplicationController
     @user = authenticate_token
     @post = Post.new(post_params)
     if !@user.nil? and @user.id==post_params[:user_id] and @post.save
-      @vote = Vote.new({user_id: @user.id, post_id: @post.id, up: true})
-      @vote.save
       @result = true
     else
       @result = false
@@ -128,7 +126,7 @@ class PostsController < ApplicationController
           vote = Vote.find_by_user_id_and_post_id(user.id, post.id)
           share = Share.find_by_user_id_and_post_id(user.id, post.id)
         end
-        @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user})))
+        @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user})))
       end
     end
   end
@@ -144,25 +142,25 @@ class PostsController < ApplicationController
           post = Post.find(followed_posts[p].id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
           share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
           p = p+1
         elsif followed_posts.nil? or p>=followed_posts.length
           post = Post.find(followed_shares[s].post_id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
           share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
+          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
           s = s+1
         elsif followed_posts[p].created_at<followed_shares[s].created_at
           post = Post.find(followed_posts[p].id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
           share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
           p = p+1
         else
           post = Post.find(followed_shares[s].post_id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
           share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: user_vote(vote), vote_stat: post.vote_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
+          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
           s = s+1
         end
         @items.push(item)
@@ -172,13 +170,11 @@ class PostsController < ApplicationController
     end
   end
 
-  def user_vote(vote)
+  def parse_vote(vote)
     if vote.nil?
-      'no vote'
-    elsif vote.up
-      'up'
+      return ""
     else
-      'down'
+      vote.action
     end
   end
 

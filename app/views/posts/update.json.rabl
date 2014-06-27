@@ -1,5 +1,5 @@
 object @post
-attributes :id, :content, :revealed, :vote_stat, :created_at, :updated_at
+attributes :id, :content, :revealed, :watch_stat, :ignore_stat, :created_at, :updated_at
 
 node :username do |post|
   if post.user.nil?

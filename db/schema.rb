@@ -25,7 +25,8 @@ ActiveRecord::Schema.define(version: 20140622045510) do
 
   create_table "posts", force: true do |t|
     t.integer  "user_id"
-    t.integer  "vote_stat"
+    t.integer  "watch_stat"
+    t.integer  "ignore_stat"
     t.integer  "share_stat"
     t.string   "content"
     t.boolean  "revealed"
@@ -58,7 +59,7 @@ ActiveRecord::Schema.define(version: 20140622045510) do
   create_table "votes", force: true do |t|
     t.integer  "user_id"
     t.integer  "post_id"
-    t.boolean  "up"
+    t.string   "action"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

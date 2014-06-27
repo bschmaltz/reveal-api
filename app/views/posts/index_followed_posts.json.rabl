@@ -1,5 +1,5 @@
 collection @items
-attributes :id, :item_type, :share_id, :share_username, :share_user_id, :content, :revealed, :vote_stat, :current_user_vote, :share_stat, :current_user_shared, :created_at, :updated_at
+attributes :id, :item_type, :share_id, :share_username, :share_user_id, :content, :revealed, :watch_stat, :ignore_stat, :current_user_vote, :share_stat, :current_user_shared, :created_at, :updated_at
 
 node :current_user_is_poster do |post|
   if post.nil? or @user.nil?
