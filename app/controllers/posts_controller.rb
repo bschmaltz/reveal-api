@@ -140,7 +140,7 @@ class PostsController < ApplicationController
         if followed_watches.nil? or w>=followed_watches.length
           post = Post.find(followed_posts[p].id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, followed_posts[p].id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
           p = p+1
         elsif followed_posts.nil? or p>=followed_posts.length
           post = Post.find(followed_watches[w].post_id)
@@ -151,7 +151,7 @@ class PostsController < ApplicationController
         elsif followed_posts[p].created_at>=followed_watches[w].updated_at
           post = Post.find(followed_posts[p].id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, followed_posts[p].id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
           p = p+1
         else
           post = Post.find(followed_watches[w].post_id)
