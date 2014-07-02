@@ -1,5 +1,6 @@
 collection @items
-attributes :id, :item_type, :share_id, :share_username, :share_user_id, :content, :revealed, :watch_stat, :ignore_stat, :current_user_vote, :share_stat, :current_user_shared, :created_at, :updated_at
+attributes :id, :item_type, :content, :revealed, :watch_stat, :ignore_stat, :current_user_vote, :created_at, :updated_at, :vote_id, :followed_username, :followed_user_id
+
 
 node :current_user_is_poster do |post|
   if post.nil? or @user.nil?
@@ -36,5 +37,13 @@ node :user_id do |post|
     post.user_id
   else
     0
+  end
+end
+
+node :current_user_is_poster do |post|
+  if post.nil? or @user.nil?
+    false
+  else
+    post.user_id==@user.id
   end
 end

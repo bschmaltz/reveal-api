@@ -14,25 +14,25 @@ class PostsController < ApplicationController
   def index_followed_posts
     @items = []
     followed_posts=nil
-    followed_shares=nil
+    followed_watches=nil
     @user = authenticate_token
     if !@user.nil?
-      if params[:last_post_id].nil? and params[:last_share_id].nil?
-        followed_posts = User.joins(:user_followed).joins(:posts).where('posts.revealed >= ?', true).order(created_at: :desc).limit(10).select('posts.id as id, posts.created_at as created_at')
-        followed_shares = User.joins(:user_followed).joins(:shares).order(created_at: :desc).limit(10).select('shares.id as id, shares.post_id as post_id, shares.created_at as created_at, users.id as user_id, users.username as username')
+      if params[:last_post_id].nil? and params[:last_vote_id].nil?
+        followed_posts = @user.user_followed.joins("LEFT JOIN posts ON posts.user_id=followers.followed_user_id").where('posts.revealed = ?', true).order('posts.created_at DESC').select('posts.id as id, posts.created_at as created_at').limit(10)
+        followed_watches = @user.user_followed.joins("LEFT JOIN votes ON votes.user_id=followers.followed_user_id").where('votes.action = ?', 'watch').order('votes.updated_at DESC').select('votes.id as id, votes.updated_at as updated_at, followers.followed_user_id as user_id, votes.post_id as post_id').order(updated_at: :desc).limit(10)
       else
         if params[:last_post_id]
           last_post = Post.find(params[:last_post_id].to_i)
-          followed_posts = User.joins(:user_followed).joins(:posts).where("posts.created_at >= ? AND posts.id != ? AND posts.revealed = ?", last_post.created_at, last_post.id, true).order(created_at: :desc).limit(10).select('posts.id as id, posts.created_at as created_at')
-          followed_shares = User.joins(:user_followed).joins(:shares).where("shares.created_at >= ?", last_post.created_at).order(created_at: :desc).limit(10).select('shares.id as id, shares.post_id as post_id, shares.created_at as created_at, users.id as user_id, users.username as username')
+          followed_posts = @user.user_followed.joins("LEFT JOIN posts ON posts.user_id=followers.followed_user_id").where('posts.revealed = ?', true).order('posts.created_at DESC').where("followers.user_id = ? AND posts.created_at <= ? AND posts.id != ? AND posts.revealed = ?", @user.id, last_post.created_at, last_post.id, true).select('posts.id as id, posts.created_at as created_at').limit(10)
+          followed_watches = @user.user_followed.joins("LEFT JOIN votes ON votes.user_id=followers.followed_user_id").where("followers.user_id = ? AND votes.action = ? AND votes.updated_at <= ?", @user.id, 'watch', last_post.created_at).order('votes.updated_at DESC').select('votes.id as id, votes.updated_at as updated_at, followers.followed_user_id as user_id, votes.post_id as post_id').limit(10)
         else
-          last_share = Share.find(params[:last_share_id].to_i)
-          followed_posts = User.joins(:user_followed).joins(:posts).where("posts.created_at >= ? AND posts.revealed = ?", last_share.created_at, true).order(created_at: :desc).limit(10).select('posts.id as id, posts.created_at as created_at')
-          followed_shares = User.joins(:user_followed).joins(:shares).where("shares.created_at >= ? AND shares.id != ?", last_share.created_at, last_share.id).order(created_at: :desc).limit(10).select('shares.id as id, shares.post_id as post_id, shares.created_at as created_at, users.id as user_id, users.username as username')
+          last_vote = Vote.find(params[:last_vote_id].to_i)
+          followed_posts = @user.user_followed.joins("LEFT JOIN posts ON posts.user_id=followers.followed_user_id").where('posts.revealed = ?', true).order('posts.created_at DESC').where("followers.user_id = ? AND posts.created_at <= ? AND posts.revealed = ?", @user.id, last_vote.created_at, true).select('posts.id as id, posts.created_at as created_at').limit(10)
+          followed_watches = @user.user_followed.joins("LEFT JOIN votes ON votes.user_id=followers.followed_user_id").where("followers.user_id = ? AND votes.action = ? AND votes.updated_at <= ? AND votes.id != ?", @user.id, 'watch', last_vote.updated_at, last_vote.id).order('votes.updated_at DESC').select('votes.id as id, votes.updated_at as updated_at, followers.followed_user_id as user_id, votes.post_id as post_id').limit(10)
         end
       end
     end
-    setup_items(followed_posts, followed_shares)
+    setup_items(followed_posts, followed_watches)
   end
 
   def index_for_user
@@ -124,44 +124,41 @@ class PostsController < ApplicationController
         share = nil
         if !user.nil?
           vote = Vote.find_by_user_id_and_post_id(user.id, post.id)
-          share = Share.find_by_user_id_and_post_id(user.id, post.id)
         end
-        @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user})))
+        @posts_with_votes.push(OpenStruct.new(post.attributes.merge({current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user})))
       end
     end
   end
 
   #need to refactor badly, but whatevs
-  def setup_items(followed_posts, followed_shares)
+  def setup_items(followed_posts, followed_watches)
     p = 0
-    s = 0
+    w = 0
     10.times do
-      if !followed_posts.nil? and !followed_shares.nil? and (p<followed_posts.length or s<followed_shares.length)
+      if !followed_posts.nil? and !followed_watches.nil? and (p<followed_posts.length or w<followed_watches.length)
         item = nil
-        if followed_shares.nil? or s>=followed_shares.length
+        if followed_watches.nil? or w>=followed_watches.length
           post = Post.find(followed_posts[p].id)
-          vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
-          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
+          vote = Vote.find_by_user_id_and_post_id(@user.id, followed_posts[p].id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
           p = p+1
         elsif followed_posts.nil? or p>=followed_posts.length
-          post = Post.find(followed_shares[s].post_id)
+          post = Post.find(followed_watches[w].post_id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
-          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
-          s = s+1
-        elsif followed_posts[p].created_at<followed_shares[s].created_at
+          followed_user = User.find(followed_watches[w].user_id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'watch', vote_id: followed_watches[w].id, followed_username: followed_user.username, followed_user_id: followed_user.id, current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
+          w = w+1
+        elsif followed_posts[p].created_at>=followed_watches[w].updated_at
           post = Post.find(followed_posts[p].id)
-          vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
-          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
+          vote = Vote.find_by_user_id_and_post_id(@user.id, followed_posts[p].id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'post', curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
           p = p+1
         else
-          post = Post.find(followed_shares[s].post_id)
+          post = Post.find(followed_watches[w].post_id)
           vote = Vote.find_by_user_id_and_post_id(@user.id, post.id)
-          share = Share.find_by_user_id_and_post_id(@user.id, post.id)
-          item = OpenStruct.new(post.attributes.merge({item_type: 'share', share_id: followed_shares[s].id, share_username: followed_shares[s].username, share_user_id: followed_shares[s].user_id, curent_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, current_user_shared: user_shared(share), share_stat: post.share_stat, user: post.user}))
-          s = s+1
+          followed_user = User.find(followed_watches[w].user_id)
+          item = OpenStruct.new(post.attributes.merge({item_type: 'watch', vote_id: followed_watches[w].id, followed_username: followed_user.username, followed_user_id: followed_user.id, current_user_vote: parse_vote(vote), watch_stat: post.watch_stat, ignore_stat: post.ignore_stat, user: post.user}))
+          w = w+1
         end
         @items.push(item)
       else
