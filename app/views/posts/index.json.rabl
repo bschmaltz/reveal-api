@@ -25,7 +25,7 @@ node :avatar_thumb do |post|
   elsif post.revealed
     post.user.avatar.url(:thumb)
   else
-    "http://s3.amazonaws.com/reveal-api-assets/static_assets/default_avatars/thumb/anonymous.jpg"
+    "https://s3.amazonaws.com/reveal-api-assets/static_assets/default_avatars/thumb/anonymous.jpg"
   end
 end
 
