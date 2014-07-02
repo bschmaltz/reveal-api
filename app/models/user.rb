@@ -8,8 +8,8 @@ class User < ActiveRecord::Base
   has_many :posts, dependent: :destroy
   has_many :votes
   has_many :shares
-  has_many :user_followers, class_name: 'Follower', foreign_key: :user_id, dependent: :destroy
-  has_many :user_followed, class_name: 'Follower', foreign_key: :followed_user_id, dependent: :destroy
+  has_many :user_followed, class_name: 'Follower', foreign_key: :user_id, dependent: :destroy
+  has_many :user_followers, class_name: 'Follower', foreign_key: :followed_user_id, dependent: :destroy
   
   has_attached_file :avatar, :styles => { :medium => "300x300>", :thumb => "100x100>" }, :default_url => "http://s3.amazonaws.com/reveal-api-assets/static_assets/default_avatars/:style/default.jpg"
   validates_attachment_content_type :avatar, :content_type => /\Aimage\/.*\Z/

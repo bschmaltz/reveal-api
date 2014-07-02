@@ -27,5 +27,5 @@ Rails.application.routes.draw do
   post '/followers', to: 'followers#create', defaults: { format: :json }
   get '/followers/:user_id', to: 'followers#get_followers_for_user', defaults: { format: :json }
   get '/followed/:user_id', to: 'followers#get_followed_for_user', defaults: { format: :json }
-  delete '/followers/:id', to: 'followers#destroy', defaults: { format: :json }
+  delete '/followers', to: 'followers#destroy', defaults: { format: :json }
 end

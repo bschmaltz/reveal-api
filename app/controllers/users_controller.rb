@@ -6,7 +6,14 @@ class UsersController < ApplicationController
   end
 
   def show
+    current_user = authenticate_token
     @user = User.find(params[:id])
+    @follower_stat = @user.user_followers.count
+    @followed_stat = @user.user_followed.count
+    @current_user_follows = false
+    if !current_user.nil? and current_user.id!=@user.id and !Follower.where('user_id = ? AND followed_user_id = ?', current_user.id, @user.id).empty?
+      @current_user_follows = true
+    end
   end
 
   def create

@@ -31,7 +31,7 @@ class FollowersController < ApplicationController
 
   def destroy
     @user = authenticate_token
-    @follower = Follower.find(params[:id])
+    @follower = Follower.find_by_user_id_and_followed_user_id(follower_params[:user_id], follower_params[:followed_user_id])
     if !@user.nil? and !@follower.nil? and @follower.user_id==@user.id and @follower.destroy
       @result = true
     else

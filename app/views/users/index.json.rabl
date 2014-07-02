@@ -1,3 +1,2 @@
 collection @users
-
-extends "users/show"
+attributes :id, :username, :created_at
