@@ -81,7 +81,7 @@ class PostsController < ApplicationController
   end
 
   def index_popular
-    @orig_request_time = (params[:orig_request_time].nil?) ? DateTime.now() : params[:orig_request_time]
+    @orig_request_time = (params[:orig_request_time].nil?) ? DateTime.now() : DateTime.parse(params[:orig_request_time])
     @posts = nil
     if params[:orig_request_time].nil?
       @posts = Post.where("created_at >= ?", 1.day.ago).sort_by {|post| post.rating(@orig_request_time) }.reverse[0..9]
