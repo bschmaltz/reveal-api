@@ -1,6 +1,11 @@
 class Post < ActiveRecord::Base
+  acts_as_mappable :default_units => :miles,
+                   :default_formula => :sphere,
+                   :distance_field_name => :distance,
+                   :lat_column_name => :latitude,
+                   :lng_column_name => :longitude
   attr_accessor :current_user_vote, :current_user_shared
-  attr_reader :watch_stat, :ignore_stat, :share_stat
+  attr_reader :watch_stat, :ignore_stat, :share_stat, :radius
   belongs_to :user
   has_many :votes
   has_many :shares

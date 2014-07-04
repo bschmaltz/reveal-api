@@ -48,6 +48,25 @@ class PostsController < ApplicationController
     render 'index'
   end
 
+  def index_by_location
+    @posts = nil
+    radius = (params[:radius].nil?) ? 10 : params[:radius]
+
+    if !params[:latitude].nil? and !params[:longitude].nil?
+      origin = [params[:latitude], params[:longitude]]
+      if params[:last_post_id].nil?
+        @posts = Post.where("longitude != ? and latitude != ?", 0, 0).within(radius, :origin => origin).order(created_at: :desc).limit(10)
+      else
+        last_post = Post.find(params[:last_post_id].to_i)
+        @posts = Post.where("longitude != ? and latitude != ?", 0, 0).where("created_at <= ? AND id != ?", last_post.created_at, last_post.id).within(radius, :origin => origin).order(created_at: :desc).limit(10)
+      end
+    end
+
+    @user = authenticate_token
+    setup_posts(@posts, @user)
+    render 'index'
+  end
+
   def index
     @posts = nil
     if params[:last_post_id].nil?
