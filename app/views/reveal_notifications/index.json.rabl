@@ -2,7 +2,7 @@ object false
 
 child @new_notifications => :new_notifications do
   collection @new_notifications
-  attributes :id, :post_id, :user_id, :viewed
+  attributes :id, :post_id, :user_id, :viewed, :created_at
   
   node :post_avatar do |notification|
     notification.post.user.avatar.url(:thumb)
@@ -20,7 +20,7 @@ end
 
 child @old_notifications => :old_notifications do
   collection @old_notifications
-  attributes :id, :post_id, :user_id, :viewed
+  attributes :id, :post_id, :user_id, :viewed, :created_at
   
   node :post_avatar do |notification|
     notification.post.user.avatar.url(:thumb)
