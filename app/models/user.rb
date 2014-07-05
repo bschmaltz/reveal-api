@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   has_many :posts, dependent: :destroy
   has_many :votes
   has_many :shares
+  has_many :reveal_notifications, dependent: :destroy
   has_many :user_followed, class_name: 'Follower', foreign_key: :user_id, dependent: :destroy
   has_many :user_followers, class_name: 'Follower', foreign_key: :followed_user_id, dependent: :destroy
   

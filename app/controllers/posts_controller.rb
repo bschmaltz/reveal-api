@@ -129,6 +129,14 @@ class PostsController < ApplicationController
     else
       @result = false
     end
+    render 'reveal'
+
+    if @result
+      watches = Vote.where('post_id = ? and action = ?', params[:id], 'watch')
+      watches.each do |watch|
+        RevealNotification.new({user_id: watch.user_id, post_id: params[:id], viewed: false}).save
+      end
+    end
   end
 
   def hide
@@ -138,6 +146,11 @@ class PostsController < ApplicationController
       @result = true
     else
       @result = false
+    end
+    render 'hide'
+    
+    if @result
+      RevealNotification.where('post_id = ?', params[:id]).destroy_all
     end
   end
 

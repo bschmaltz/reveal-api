@@ -29,4 +29,8 @@ Rails.application.routes.draw do
   get '/followers/:user_id', to: 'followers#get_followers_for_user', defaults: { format: :json }
   get '/followed/:user_id', to: 'followers#get_followed_for_user', defaults: { format: :json }
   delete '/followers', to: 'followers#destroy', defaults: { format: :json }
+
+  get '/reveal_notifications', to: 'reveal_notifications#index', defaults: { format: :json }
+  put '/reveal_notifications/viewed_new_notifications', to: 'reveal_notifications#viewed_new_notifications', defaults: { format: :json }
+  delete '/reveal_notifications', to: 'reveal_notifications#destroy', defaults: { format: :json }
 end
