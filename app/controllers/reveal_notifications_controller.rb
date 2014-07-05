@@ -25,8 +25,8 @@ class RevealNotificationsController < ApplicationController
 
   def destroy
     user = authenticate_token
-    notification = RevealNotification.find_by_user_id_and_post_id(params[:user_id], params[:post_id])
-    if !user.nil? and !notification.nil? and notification.destroy
+    notification = RevealNotification.find(params[:id])
+    if !user.nil? and !notification.nil? and user.id==notification.user_id and notification.destroy
       @result = true
     else
       @result = false
