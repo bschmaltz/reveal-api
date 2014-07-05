@@ -7,6 +7,9 @@ child @new_notifications => :new_notifications do
   node :post_avatar do |notification|
     notification.post.user.avatar.url(:thumb)
   end
+  node :post_user_id do |notification|
+    notification.post.user.id
+  end
   node :post_username do |notification|
     notification.post.user.username
   end
@@ -21,6 +24,9 @@ child @old_notifications => :old_notifications do
   
   node :post_avatar do |notification|
     notification.post.user.avatar.url(:thumb)
+  end
+  node :post_user_id do |notification|
+    notification.post.user.id
   end
   node :post_username do |notification|
     notification.post.user.username

@@ -6,8 +6,8 @@ class RevealNotificationsController < ApplicationController
     @new_notifications = nil
     user = authenticate_token
     if !user.nil?
-      @old_notifications = RevealNotification.where("user_id = ? AND viewed = ?", user.id, true)
-      @new_notifications = RevealNotification.where("user_id = ? AND viewed = ?", user.id, false)
+      @old_notifications = RevealNotification.where("user_id = ? AND viewed = ?", user.id, true).order(created_at: :desc)
+      @new_notifications = RevealNotification.where("user_id = ? AND viewed = ?", user.id, false).order(created_at: :desc)
     end
   end
 
