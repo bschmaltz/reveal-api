@@ -84,10 +84,10 @@ class PostsController < ApplicationController
     @orig_request_time = (params[:orig_request_time].nil?) ? DateTime.now() : DateTime.parse(params[:orig_request_time])
     @posts = nil
     if params[:orig_request_time].nil?
-      @posts = Post.where("created_at >= ?", 1.day.ago).sort_by {|post| post.rating(@orig_request_time) }.reverse[0..9]
+      @posts = Post.where("created_at >= ?", 31.days.ago).sort_by {|post| post.rating(@orig_request_time) }.reverse[0..9]
     elsif !params[:page].nil? and !params[:orig_request_time].nil?
       first_post_num = params[:page].to_i*10
-      @posts = Post.where("created_at >= ?", 1.day.ago).sort_by {|post| post.rating(@orig_request_time) }.reverse[first_post_num..first_post_num+9]
+      @posts = Post.where("created_at >= ?", 31.days.ago).sort_by {|post| post.rating(@orig_request_time) }.reverse[first_post_num..first_post_num+9]
     end
 
     @user = authenticate_token
