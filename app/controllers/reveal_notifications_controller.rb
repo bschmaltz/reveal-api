@@ -9,6 +9,13 @@ class RevealNotificationsController < ApplicationController
       @old_notifications = RevealNotification.where("user_id = ? AND viewed = ?", user.id, true).order(created_at: :desc)
       @new_notifications = RevealNotification.where("user_id = ? AND viewed = ?", user.id, false).order(created_at: :desc)
     end
+
+    @old_notifications.each do |notification|
+      if notification.post == nil
+        notification.destroy()
+    @new_notifications.each do |notification|
+      if notification.post == nil
+        notification.destroy()
   end
 
   def viewed_new_notifications

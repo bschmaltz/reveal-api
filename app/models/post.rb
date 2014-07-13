@@ -7,8 +7,9 @@ class Post < ActiveRecord::Base
   attr_accessor :current_user_vote, :current_user_shared
   attr_reader :watch_stat, :ignore_stat, :share_stat
   belongs_to :user
-  has_many :votes
+  has_many :votes, dependent: :destroy
   has_many :shares
+  has_many :reveal_notfications, dependent: :destroy
 
   validates_length_of :content, :minimum => 1, :maximum => 200, :allow_blank => false
 
