@@ -9,7 +9,7 @@ class Post < ActiveRecord::Base
   belongs_to :user
   has_many :votes, dependent: :destroy
   has_many :shares
-  has_many :reveal_notfications, dependent: :destroy
+  has_many :reveal_notifications, dependent: :destroy
 
   validates_length_of :content, :minimum => 1, :maximum => 200, :allow_blank => false
 
