@@ -27,7 +27,7 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :username, :case_sensitive => false, :message => "is already in use by another user"
 
   validates_format_of :username, :with => /\A([a-z0-9_]{2,16})\z/i,
-    :message => "Username must be 4 to 16 letters, numbers or underscores and have no spaces"
+    :message => "Username must be 2 to 16 letters, numbers or underscores and have no spaces"
 
   validates_format_of :password, :with => /\A([\x20-\x7E]){4,16}\z/,
     :message => "must be 4 to 16 characters",
